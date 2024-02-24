@@ -8,7 +8,7 @@ CORS(app)
 
 desired_leagues = ["LaLiga", "Premier League", "Serie A", "Coppa Italia", "Ligue 1",
                    "Copa do Mundo de Clubes", "Brasileirão", "UEFA Liga Europa",
-                   "EUFA Liga dos Campeões", "CONMEBOL Libertadores", "Brasileirão Série B"]
+                   "UEFA Liga dos Campeões", "CONMEBOL Libertadores", "Brasileirão Série B", "Campeonato Paulista"]
 
 def enterOnPageGame(gameid):
     url = "https://onefootball.com/pt-br/match/" + gameid
@@ -62,7 +62,11 @@ def getTeamName():
 
         home_logo_url = match_soup.find_all("img", class_="EntityLogo_entityLogoImage__4X0wF")[1]["src"]
         away_logo_url = match_soup.find_all("img", class_="EntityLogo_entityLogoImage__4X0wF")[2]["src"]
-        game_time = match_soup.find("span", class_="title-6-bold MatchScore_numeric__ke8YT").text
+
+        # Check if the element is found before accessing its text attribute
+        game_time_element = match_soup.find("span", class_="title-6-bold MatchScore_numeric__ke8YT")
+        game_time = game_time_element.text if game_time_element else None
+
         league_logo_url = match_soup.find_all("img", class_="EntityLogo_entityLogoImage__4X0wF")[0]["src"]
 
         date_span = match_soup.find("span", class_="title-7-medium", text="Início")
@@ -70,7 +74,6 @@ def getTeamName():
 
         league_span = match_soup.find("span", class_="title-7-medium", text="Competição")
         league = getLeague(league_span)
-
 
         if home_team and away_team and tv_broadcaster and league in desired_leagues:
             team_names.append({
@@ -89,6 +92,7 @@ def getTeamName():
                 "league_logo_url": league_logo_url
             })
     return team_names
+
 
 @app.route('/api', methods=['GET'])
 def api():
